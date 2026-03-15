@@ -1,0 +1,6 @@
+node_modules/
+.env
+.DS_Store
+Food-del-ai-doc.md
+test_group.js
+test_group_cancellation.js

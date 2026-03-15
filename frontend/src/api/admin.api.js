@@ -1,0 +1,21 @@
+import API from './axios';
+
+export const getDashboardStats = () => API.get('/admin/dashboard');
+export const getAllUsers = (params) => API.get('/admin/users', { params });
+export const getPendingUsers = () => API.get('/admin/users/pending');
+export const approveUser = (id) => API.patch(`/admin/users/${id}/approve`);
+export const rejectUser = (id) => API.patch(`/admin/users/${id}/reject`);
+export const toggleUserBan = (id) => API.patch(`/admin/users/${id}/ban`);
+export const deleteUser = (id) => API.delete(`/admin/users/${id}`);
+export const getAllCustomers = () => API.get('/admin/customers');
+export const getAllDeliveryPartners = (params) => API.get('/admin/delivery-partners', { params });
+export const markDeliveryPayoutPaid = (id) => API.patch(`/admin/delivery-partners/${id}/mark-paid`);
+export const getAllNGOs = (params) => API.get('/admin/ngos', { params });
+export const getAllRestaurants = (params) => API.get('/admin/restaurants', { params });
+export const markRestaurantPayoutPaid = (id) => API.patch(`/admin/restaurants/${id}/mark-paid`);
+export const getAllOrders = (params) => API.get('/admin/orders', { params });
+export const getLiveOrders = () => API.get('/admin/orders/live');
+export const getOrderHistory = (params) => API.get('/admin/orders/history', { params });
+export const getAllLeftoverClaims = (params) => API.get('/admin/leftover-claims', { params });
+export const adminCancelOrder = (id) => API.patch(`/admin/orders/${id}/cancel`);
+export const adminUnassignDelivery = (id) => API.patch(`/admin/orders/${id}/unassign-delivery`);
