@@ -1,9 +1,19 @@
 import nodemailer from 'nodemailer';
 
+const EMAIL_CONNECTION_TIMEOUT_MS = 10000;
+const EMAIL_SOCKET_TIMEOUT_MS = 15000;
+
 const createTransporter = () => {
+  const port = Number(process.env.EMAIL_PORT) || 587;
+
   return nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
+    port,
+    secure: port === 465,
+    requireTLS: port === 587,
+    connectionTimeout: EMAIL_CONNECTION_TIMEOUT_MS,
+    greetingTimeout: EMAIL_CONNECTION_TIMEOUT_MS,
+    socketTimeout: EMAIL_SOCKET_TIMEOUT_MS,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
@@ -14,12 +24,23 @@ const createTransporter = () => {
 const sendEmail = async ({ to, subject, html }) => {
   const transporter = createTransporter();
 
-  await transporter.sendMail({
-    from: `"Food Delivery" <${process.env.EMAIL_USER}>`,
-    to,
-    subject,
-    html,
-  });
+  try {
+    await transporter.sendMail({
+      from: `"Food Delivery" <${process.env.EMAIL_USER}>`,
+      to,
+      subject,
+      html,
+    });
+  } catch (error) {
+    console.error('Email delivery failed:', {
+      message: error.message,
+      code: error.code,
+      response: error.response,
+      responseCode: error.responseCode,
+      command: error.command,
+    });
+    throw error;
+  }
 };
 
 // ===== Email Templates =====
