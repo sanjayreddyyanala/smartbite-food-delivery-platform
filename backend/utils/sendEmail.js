@@ -3,11 +3,25 @@ import nodemailer from 'nodemailer';
 const EMAIL_CONNECTION_TIMEOUT_MS = 10000;
 const EMAIL_SOCKET_TIMEOUT_MS = 15000;
 
-const createTransporter = () => {
+const getEmailConfig = () => {
+  const host = process.env.EMAIL_HOST?.trim();
+  const user = process.env.EMAIL_USER?.trim();
+  const rawPass = process.env.EMAIL_PASS || '';
+  const pass = host === 'smtp.gmail.com' ? rawPass.replace(/\s+/g, '') : rawPass.trim();
   const port = Number(process.env.EMAIL_PORT) || 587;
 
+  if (!host || !user || !pass) {
+    throw new Error('Email configuration is incomplete. Check EMAIL_HOST, EMAIL_USER, and EMAIL_PASS.');
+  }
+
+  return { host, user, pass, port };
+};
+
+const createTransporter = () => {
+  const { host, user, pass, port } = getEmailConfig();
+
   return nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
+    host,
     port,
     secure: port === 465,
     requireTLS: port === 587,
@@ -15,18 +29,19 @@ const createTransporter = () => {
     greetingTimeout: EMAIL_CONNECTION_TIMEOUT_MS,
     socketTimeout: EMAIL_SOCKET_TIMEOUT_MS,
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
+      user,
+      pass,
     },
   });
 };
 
 const sendEmail = async ({ to, subject, html }) => {
   const transporter = createTransporter();
+  const { user } = getEmailConfig();
 
   try {
     await transporter.sendMail({
-      from: `"Food Delivery" <${process.env.EMAIL_USER}>`,
+      from: `"Food Delivery" <${user}>`,
       to,
       subject,
       html,
