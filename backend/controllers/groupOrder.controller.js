@@ -8,6 +8,7 @@ import AppError from '../utils/AppError.js';
 import catchAsync from '../utils/catchAsync.js';
 import calculateDeliveryFee from '../utils/calculateDeliveryFee.js';
 import { sendGroupInviteEmail } from '../utils/sendEmail.js';
+import getFrontendBaseUrl from '../utils/getFrontendBaseUrl.js';
 import { GROUP_ORDER_STATUS, CART_PERMISSION, ORDER_STATUS, NOTIFICATION_TYPES } from '../constants/index.js';
 import { emitToGroup } from '../sockets/groupOrder.socket.js';
 import { emitNewOrder } from '../sockets/order.socket.js';
@@ -842,7 +843,7 @@ export const inviteByEmail = catchAsync(async (req, res, next) => {
   const results = [];
   const hostName = req.user.name || 'Someone';
   const restaurantName = group.restaurant ? (await Restaurant.findById(group.restaurant))?.name : '';
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const frontendUrl = getFrontendBaseUrl(req);
   const joinLink = `${frontendUrl}/group/join/${group.code}`;
 
   for (const inviteeEmail of emailList) {

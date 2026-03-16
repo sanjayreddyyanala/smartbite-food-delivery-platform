@@ -7,6 +7,7 @@ import NGOProfile from '../models/NGOProfile.js';
 import Restaurant from '../models/Restaurant.js';
 import AppError from '../utils/AppError.js';
 import catchAsync from '../utils/catchAsync.js';
+import getFrontendBaseUrl from '../utils/getFrontendBaseUrl.js';
 import { sendPasswordResetEmail } from '../utils/sendEmail.js';
 import { ROLES, USER_STATUS, PASSWORD_RESET_EXPIRES_MINS } from '../constants/index.js';
 
@@ -156,7 +157,7 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
   await user.save({ validateBeforeSave: false });
 
   // Build reset URL pointing to frontend page (which will submit new password to API)
-  const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const frontendURL = getFrontendBaseUrl(req);
   const resetURL = `${frontendURL}/reset-password/${rawToken}`;
 
   console.log(resetURL);
