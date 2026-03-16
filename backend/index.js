@@ -31,8 +31,31 @@ const server = createServer(app);
 // Initialize Socket.io
 initSocket(server);
 
+const parseAllowedOrigins = () => {
+  const fromList = (process.env.FRONTEND_URLS || '')
+    .split(',')
+    .map((url) => url.trim())
+    .filter(Boolean);
+
+  const fallbackOrigins = [
+    process.env.FRONTEND_URL,
+    'http://localhost:5173',
+  ].filter(Boolean);
+
+  return [...new Set([...fromList, ...fallbackOrigins])];
+};
+
+const allowedOrigins = parseAllowedOrigins();
+const corsOrigin = (origin, callback) => {
+  // Allow non-browser requests (e.g. health checks, server-to-server calls)
+  if (!origin) return callback(null, true);
+  if (allowedOrigins.includes(origin)) return callback(null, true);
+
+  return callback(new Error('Not allowed by CORS'));
+};
+
 // ===== Middleware =====
-app.use(cors());
+app.use(cors({ origin: corsOrigin }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

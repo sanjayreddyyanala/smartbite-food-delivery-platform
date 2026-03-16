@@ -4,6 +4,27 @@ import { SOCKET_EVENTS } from '../constants/index.js';
 
 let io;
 
+const parseAllowedOrigins = () => {
+  const fromList = (process.env.FRONTEND_URLS || '')
+    .split(',')
+    .map((url) => url.trim())
+    .filter(Boolean);
+
+  const fallbackOrigins = [
+    process.env.FRONTEND_URL,
+    'http://localhost:5173',
+  ].filter(Boolean);
+
+  return [...new Set([...fromList, ...fallbackOrigins])];
+};
+
+const allowedOrigins = parseAllowedOrigins();
+const socketCorsOrigin = (origin, callback) => {
+  if (!origin) return callback(null, true);
+  if (allowedOrigins.includes(origin)) return callback(null, true);
+  return callback(new Error('Not allowed by Socket.IO CORS'));
+};
+
 /**
  * Initialize Socket.io with the HTTP server.
  * @param {import('http').Server} httpServer
@@ -12,7 +33,7 @@ let io;
 export const initSocket = (httpServer) => {
   io = new Server(httpServer, {
     cors: {
-      origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+      origin: socketCorsOrigin,
       methods: ['GET', 'POST'],
     },
   });
