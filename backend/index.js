@@ -32,7 +32,7 @@ const server = createServer(app);
 initSocket(server);
 
 const parseAllowedOrigins = () => {
-  const fromList = (process.env.FRONTEND_URLS || '')
+  const fromList = (process.env.FRONTEND_URLS || 'https://smartbite-eight.vercel.app')
     .split(',')
     .map((url) => url.trim())
     .filter(Boolean);
