@@ -25,6 +25,9 @@ const createTransporter = () => {
     port,
     secure: port === 465,
     requireTLS: port === 587,
+    pool: true,                // reuse connections
+    maxConnections: 5,         // limit concurrent SMTP connections
+    maxMessages: 100,          // messages per connection before reconnect
     connectionTimeout: EMAIL_CONNECTION_TIMEOUT_MS,
     greetingTimeout: EMAIL_CONNECTION_TIMEOUT_MS,
     socketTimeout: EMAIL_SOCKET_TIMEOUT_MS,
@@ -35,8 +38,17 @@ const createTransporter = () => {
   });
 };
 
+// Cached singleton transporter (lazy-initialized)
+let _transporter = null;
+const getTransporter = () => {
+  if (!_transporter) {
+    _transporter = createTransporter();
+  }
+  return _transporter;
+};
+
 const sendEmail = async ({ to, subject, html }) => {
-  const transporter = createTransporter();
+  const transporter = getTransporter();
   const { user } = getEmailConfig();
 
   try {

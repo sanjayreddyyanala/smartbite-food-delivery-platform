@@ -160,7 +160,7 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
   const frontendURL = getFrontendBaseUrl(req);
   const resetURL = `${frontendURL}/reset-password/${rawToken}`;
 
-  console.log(resetURL);
+  // Reset URL is sent via email — never log it (contains secret token)
 
   try {
     await sendPasswordResetEmail(user.email, user.name, resetURL);

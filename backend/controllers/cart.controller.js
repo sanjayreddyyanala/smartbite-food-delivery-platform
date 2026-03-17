@@ -10,7 +10,8 @@ const normalizeCookingInstructions = (instructions = '') => String(instructions 
 export const getCart = catchAsync(async (req, res, next) => {
   let cart = await Cart.findOne({ customer: req.profileId })
     .populate('restaurant', 'name coverImage isOnline')
-    .populate('items.foodItem', 'image isAvailable availableQuantity');
+    .populate('items.foodItem', 'image isAvailable availableQuantity')
+    .lean();
 
   if (!cart) {
     cart = { customer: req.profileId, restaurant: null, items: [] };

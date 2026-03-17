@@ -140,7 +140,6 @@ const RestaurantDetail = () => {
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to add to cart');
     } finally {
-      setAddingToCart(nextItem.food._id);
       setAddingToCart(null);
     }
   };
@@ -706,10 +705,15 @@ const FoodItemCard = ({ food, index, cartQty, onAdd, onUpdateQty, adding, isOnli
 
   const handleAddClick = async (event) => {
     event.preventDefault();
-    const added = await onAdd(instructionDraft);
-    if (added) {
-      setInstructionDraft('');
-      setShowInstructions(false);
+    // Capture and clear immediately to prevent duplicate sends on re-render
+    const note = instructionDraft;
+    setInstructionDraft('');
+    setShowInstructions(false);
+    const added = await onAdd(note);
+    if (!added) {
+      // Restore if add failed (e.g. restaurant conflict)
+      setInstructionDraft(note);
+      setShowInstructions(true);
     }
   };
 
@@ -718,10 +722,15 @@ const FoodItemCard = ({ food, index, cartQty, onAdd, onUpdateQty, adding, isOnli
 
     // If a note is typed, + should add a new cart line with that instruction.
     if (instructionDraft.trim()) {
-      const added = await onAdd(instructionDraft);
-      if (added) {
-        setInstructionDraft('');
-        setShowInstructions(false);
+      // Capture and clear immediately to prevent duplicate sends on re-render
+      const note = instructionDraft;
+      setInstructionDraft('');
+      setShowInstructions(false);
+      const added = await onAdd(note);
+      if (!added) {
+        // Restore if add failed (e.g. restaurant conflict)
+        setInstructionDraft(note);
+        setShowInstructions(true);
       }
       return;
     }

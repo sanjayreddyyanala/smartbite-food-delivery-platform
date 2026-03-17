@@ -30,17 +30,17 @@ export const postLeftoverFood = catchAsync(async (req, res, next) => {
 
   // Notify all approved NGOs via email AND in-app (fire and forget)
   const ngoUsers = await User.find({ role: ROLES.NGO, status: 'approved' });
-  ngoUsers.forEach(ngo => {
-    sendLeftoverFoodAlertEmail(
-      ngo.email,
-      ngo.name,
-      restaurant.name,
-      description,
-      quantity
-    ).catch(err => {
-      console.error(`Failed to notify NGO ${ngo.email}:`, err.message);
-    });
-  });
+  // Send emails in batches to avoid overwhelming the SMTP server
+  const EMAIL_BATCH_SIZE = 5;
+  const sendAlertToNgo = (ngo) =>
+    sendLeftoverFoodAlertEmail(ngo.email, ngo.name, restaurant.name, description, quantity)
+      .catch(err => console.error(`Failed to notify NGO ${ngo.email}:`, err.message));
+
+  for (let i = 0; i < ngoUsers.length; i += EMAIL_BATCH_SIZE) {
+    const batch = ngoUsers.slice(i, i + EMAIL_BATCH_SIZE);
+    // Fire batch concurrently but wait for it before starting the next batch
+    Promise.allSettled(batch.map(sendAlertToNgo));
+  }
 
   // In-app notifications for NGOs
   if (ngoUsers.length > 0) {

@@ -865,9 +865,13 @@ export const inviteByEmail = catchAsync(async (req, res, next) => {
         continue;
       }
 
-      await sendGroupInviteEmail(inviteeEmail, hostName, restaurantName, joinLink);
-      results.push({ email: inviteeEmail, status: 'sent' });
-    } catch (err) {
+      try {
+        await sendGroupInviteEmail(inviteeEmail, hostName, restaurantName, joinLink);
+        results.push({ email: inviteeEmail, status: 'sent' });
+      } catch {
+        results.push({ email: inviteeEmail, status: 'failed', reason: 'Email delivery failed' });
+      }
+    } catch {
       results.push({ email: inviteeEmail, status: 'failed', reason: 'Email delivery failed' });
     }
   }
