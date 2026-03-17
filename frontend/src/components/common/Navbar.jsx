@@ -79,7 +79,7 @@ const Navbar = ({ style = {} }) => {
             fontWeight: 800,
             letterSpacing: '-0.02em',
           }}>
-            FoodDash
+            SmartBite
           </span>
         </Link>
 
